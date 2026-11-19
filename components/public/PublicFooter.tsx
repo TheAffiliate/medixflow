@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 
-export default function PublicFooter() {
-  // Static fallback for the prerender; replaced with the real year after mount.
-  const [year, setYear] = useState(2026);
+// Nothing to subscribe to: the year doesn't change while the page is open.
+const subscribe = () => () => {};
 
-  useEffect(() => {
-    setYear(new Date().getFullYear());
-  }, []);
+function useCurrentYear(): number {
+  return useSyncExternalStore(
+    subscribe,
+    () => new Date().getFullYear(), // browser
+    () => 2026 // server / prerender fallback
+  );
+}
+
+export default function PublicFooter() {
+  const year = useCurrentYear();
 
   return (
     <footer className="border-t border-border bg-background">
